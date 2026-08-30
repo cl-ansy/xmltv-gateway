@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+
+: "${CACHE_FILE:?}" "${CRON_SCHEDULE:?}" "${RUN_AS:?}"
+
+# `fetch` runs one fetch and exits, for checking a provider's configuration
+# without starting the service.
+if [ "${1:-}" = "fetch" ]; then
+    exec python -m xmltv_gateway.guide
+fi
+
+job="cd /app && python -m xmltv_gateway.guide"
+
+echo "@reboot $job
+$CRON_SCHEDULE $job" | crontab -u "$RUN_AS" -
+
+crond -f -L /dev/stdout &
+
+echo "xmltv-gateway: provider=${PROVIDER:-unset} schedule='$CRON_SCHEDULE' user=$RUN_AS"
+exec darkhttpd "$(dirname "$CACHE_FILE")" --port 8080 --no-listing --uid "$RUN_AS"

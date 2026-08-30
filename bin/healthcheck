@@ -1,0 +1,12 @@
+#!/bin/sh
+# Unhealthy if the guide is missing or has not been refreshed in MAX_AGE
+# seconds, which covers a dead crond, a failing provider and a dead network
+# alike.
+set -eu
+
+: "${CACHE_FILE:?}" "${MAX_AGE:?}"
+
+[ -s "$CACHE_FILE" ] || { echo "no guide at $CACHE_FILE"; exit 1; }
+
+age=$(( $(date +%s) - $(stat -c %Y "$CACHE_FILE") ))
+[ "$age" -lt "$MAX_AGE" ] || { echo "guide is ${age}s old, limit ${MAX_AGE}s"; exit 1; }
