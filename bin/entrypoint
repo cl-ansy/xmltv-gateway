@@ -17,4 +17,4 @@ $CRON_SCHEDULE $job" | crontab -u "$RUN_AS" -
 crond -f -L /dev/stdout &
 
 echo "xmltv-gateway: provider=${PROVIDER:-unset} schedule='$CRON_SCHEDULE' user=$RUN_AS"
-exec darkhttpd "$(dirname "$CACHE_FILE")" --port 8080 --no-listing --uid "$RUN_AS"
+exec darkhttpd "$(dirname "$CACHE_FILE")" --port 8080 --no-listing --ipv6 --uid "$RUN_AS"

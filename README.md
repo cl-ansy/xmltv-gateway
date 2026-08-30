@@ -24,14 +24,18 @@ The guide is at `http://xmltv-gateway:8080/xmltv.xml`.
 Put the container on the same Docker network as Jellyfin so the service name
 resolves. There is no shared volume and Jellyfin needs no credentials.
 
-Confirm the guide is being served before touching Jellyfin.
+Confirm the guide is being served before touching Jellyfin. The service name
+resolves only from other containers on that network, and no port is published to
+the host, so check from inside the container.
 
 ```bash
 docker compose logs xmltv-gateway     # expect "refreshed guide (N bytes)"
-curl -sI http://<gateway-host>:8080/xmltv.xml
+docker compose exec xmltv-gateway wget -qO- http://localhost:8080/xmltv.xml | wc -c
 ```
 
 A `404` means no guide has been fetched yet. The logs say why.
+
+Add `ports: ["8080:8080"]` if you want to reach it from the host as well.
 
 1. **Add the tuner** if it isn't already there. Dashboard > Live TV > Tuner
    Devices > **+**. For an HDHomeRun pick that type and let it discover, or
